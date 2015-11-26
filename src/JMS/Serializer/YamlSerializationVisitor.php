@@ -101,7 +101,7 @@ class YamlSerializationVisitor extends AbstractVisitor
         $isList = array_keys($data) === range(0, count($data) - 1);
 
         foreach ($data as $k => $v) {
-            if (null === $v && (!is_string($k) || ! $context->shouldSerializeNull())) {
+            if (null === $v && ( ! is_string($k) || ! $context->shouldSerializeNull())) {
                 continue;
             }
 
@@ -127,6 +127,11 @@ class YamlSerializationVisitor extends AbstractVisitor
             $this->writer
                 ->rtrim(false)
                 ->writeln(' {}')
+            ;
+        } elseif (empty($data)) {
+            $this->writer
+                ->rtrim(false)
+                ->writeln(' []')
             ;
         }
     }
@@ -172,13 +177,13 @@ class YamlSerializationVisitor extends AbstractVisitor
     {
         $v = $metadata->getValue($data);
 
-        if (null === $v && !$context->shouldSerializeNull()) {
+        if (null === $v && ! $context->shouldSerializeNull()) {
             return;
         }
 
         $name = $this->namingStrategy->translateName($metadata);
 
-        if (!$metadata->inline) {
+        if ( ! $metadata->inline) {
             $this->writer
                  ->writeln(Inline::dump($name).':')
                  ->indent();
@@ -193,11 +198,11 @@ class YamlSerializationVisitor extends AbstractVisitor
                 ->rtrim(false)
                 ->writeln(' '.$v)
             ;
-        } elseif ($count === $this->writer->changeCount && !$metadata->inline) {
+        } elseif ($count === $this->writer->changeCount && ! $metadata->inline) {
             $this->writer->revert();
         }
 
-        if (!$metadata->inline) {
+        if ( ! $metadata->inline) {
             $this->writer->outdent();
         }
         $this->revertCurrentMetadata();

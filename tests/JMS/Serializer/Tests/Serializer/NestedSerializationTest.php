@@ -105,12 +105,6 @@ class NestedSerializationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('{"authors":[{"full_name":"foo"},{"full_name":"bar"}],"_extraJson":"{\"foo\":\"bar\"}"}', $this->serializer->serialize($list, 'json'));
     }
 
-    protected function getContent($key)
-    {
-        $this->markTestSkipped("Do not run this test. (JMS Serializer tests are bad)");
-        return [];
-    }
-
     protected function getFormat()
     {
         return 'json';

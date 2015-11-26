@@ -82,8 +82,10 @@ class Serializer implements SerializerInterface
                 $this->visit($visitor, $context, $visitor->prepare($data), $format);
 
                 $result = $visitor->getResult();
-                // Does not exist anymore
-                //$visitor->endNavigator();
+
+                if ($visitor instanceof GenericSerializationVisitor) {
+                    $visitor->endNavigator();
+                }
 
                 return $result;
             })

@@ -683,7 +683,7 @@ abstract class BaseSerializingTest extends BaseSerializationTest
     }
 
     /**
-     * @expectedException JMS\Serializer\Exception\InvalidArgumentException
+     * @expectedException \JMS\Serializer\Exception\InvalidArgumentException
      * @expectedExceptionMessage Invalid group name "foo, bar" on "JMS\Serializer\Tests\Fixtures\InvalidGroupsObject->foo", did you mean to create multiple groups?
      */
     public function testInvalidGroupName()
@@ -864,9 +864,6 @@ abstract class BaseSerializingTest extends BaseSerializationTest
         $this->assertEquals(new Order(new Price(12.34)), $deseralizedOrder);
         $this->assertAttributeInstanceOf('JMS\Serializer\Tests\Fixtures\Price', 'cost', $deseralizedOrder);
     }
-
-    abstract protected function getContent($key);
-    abstract protected function getFormat();
 
     protected function hasDeserializer()
     {

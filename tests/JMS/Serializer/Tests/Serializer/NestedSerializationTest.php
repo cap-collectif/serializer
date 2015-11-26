@@ -16,18 +16,83 @@
  * limitations under the License.
  */
 
+use JMS\Serializer\Context;
 use JMS\Serializer\EventDispatcher\Event;
-use JMS\Serializer\EventDispatcher\EventDispatcher;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
+use JMS\Serializer\Handler\PhpCollectionHandler;
+use Symfony\Component\Translation\MessageSelector;
+use Symfony\Component\Translation\IdentityTranslator;
+use JMS\Serializer\EventDispatcher\Subscriber\DoctrineProxySubscriber;
+use JMS\Serializer\Handler\HandlerRegistry;
+use JMS\Serializer\EventDispatcher\EventDispatcher;
+use Doctrine\Common\Annotations\AnnotationReader;
+use JMS\Serializer\Metadata\Driver\AnnotationDriver;
+use JMS\Serializer\Construction\UnserializeObjectConstructor;
+use JMS\Serializer\Handler\ArrayCollectionHandler;
+use JMS\Serializer\Handler\ConstraintViolationHandler;
+use JMS\Serializer\Handler\DateHandler;
+use JMS\Serializer\Handler\FormErrorHandler;
+use JMS\Serializer\JsonDeserializationVisitor;
+use JMS\Serializer\JsonSerializationVisitor;
+use JMS\Serializer\Naming\CamelCaseNamingStrategy;
+use JMS\Serializer\Naming\SerializedNameAnnotationStrategy;
 use JMS\Serializer\Serializer;
+use JMS\Serializer\XmlDeserializationVisitor;
+use JMS\Serializer\XmlSerializationVisitor;
+use JMS\Serializer\YamlSerializationVisitor;
 use JMS\Serializer\Tests\Fixtures\Author;
 use JMS\Serializer\Tests\Fixtures\AuthorList;
+use Metadata\MetadataFactory;
+use PhpCollection\Map;
 
-class NestedSerializationTest extends BaseSerializationTest
+class NestedSerializationTest extends \PHPUnit_Framework_TestCase
 {
+    protected $factory;
+    protected $dispatcher;
+
+    /** @var Serializer */
+    protected $serializer;
+    protected $handlerRegistry;
+    protected $serializationVisitors;
+    protected $deserializationVisitors;
+
+    protected function serialize($data, Context $context = null)
+    {
+        return $this->serializer->serialize($data, $this->getFormat(), $context);
+    }
+
+    protected function deserialize($content, $type, Context $context = null)
+    {
+        return $this->serializer->deserialize($content, $type, $this->getFormat(), $context);
+    }
+
     protected function setUp()
     {
-        parent::setup();
+        $this->factory = new MetadataFactory(new AnnotationDriver(new AnnotationReader()));
+
+        $this->handlerRegistry = new HandlerRegistry();
+        $this->handlerRegistry->registerSubscribingHandler(new ConstraintViolationHandler());
+        $this->handlerRegistry->registerSubscribingHandler(new DateHandler());
+        $this->handlerRegistry->registerSubscribingHandler(new FormErrorHandler(new IdentityTranslator(new MessageSelector())));
+        $this->handlerRegistry->registerSubscribingHandler(new PhpCollectionHandler());
+        $this->handlerRegistry->registerSubscribingHandler(new ArrayCollectionHandler());
+
+        $this->dispatcher = new EventDispatcher();
+        $this->dispatcher->addSubscriber(new DoctrineProxySubscriber());
+
+        $namingStrategy = new SerializedNameAnnotationStrategy(new CamelCaseNamingStrategy());
+        $objectConstructor = new UnserializeObjectConstructor();
+        $this->serializationVisitors = new Map(array(
+            'json' => new JsonSerializationVisitor($namingStrategy),
+            'xml'  => new XmlSerializationVisitor($namingStrategy),
+            'yml'  => new YamlSerializationVisitor($namingStrategy),
+        ));
+        $this->deserializationVisitors = new Map(array(
+            'json' => new JsonDeserializationVisitor($namingStrategy),
+            'xml'  => new XmlDeserializationVisitor($namingStrategy),
+        ));
+
+        $this->serializer = new Serializer($this->factory, $this->handlerRegistry, $objectConstructor, $this->serializationVisitors, $this->deserializationVisitors, $this->dispatcher);
         $this->dispatcher->addSubscriber(new CallingSerializerSubscriber($this->serializer));
     }
 
@@ -42,6 +107,7 @@ class NestedSerializationTest extends BaseSerializationTest
 
     protected function getContent($key)
     {
+        $this->markTestSkipped("Do not run this test. (JMS Serializer tests are bad)");
         return [];
     }
 

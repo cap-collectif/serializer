@@ -43,14 +43,14 @@ class SerializerExtension extends \Twig_Extension
     public function getFilters()
     {
         return array(
-            'serialize'      => new \Twig_SimpleFilter($this, 'serialize'),
+            new \Twig_SimpleFilter('serialize', [$this, 'serialize']),
         );
     }
 
     public function getFunctions()
     {
         return array(
-            'serialization_context' => new \Twig_SimpleFunction($this, 'createContext'),
+            new \Twig_SimpleFunction('serialization_context', [$this, 'createContext']),
         );
     }
 
